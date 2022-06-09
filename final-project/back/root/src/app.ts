@@ -1,38 +1,34 @@
 import express from "express";
-import { indexRouter } from "./routes/indexRouter";
-import { handRouter } from "./routes/handRouter";
+import { routes } from "./routes/index";
 
 import morgan from "morgan";
+import cors from "cors";
+import path from "path";
+
+// 공통 사항
+import swaggerUi from "swagger-ui-express";
+
+// yaml을 연동하기 위함
+import YAML from "yamljs";
 
 import { errorMiddleware } from "./middlewares/errorMiddleware";
 
-export default class Server {
-  app;
-  constructor() {
-    this.app = express();
-  }
+const app = express();
 
-  setRouter() {
-    this.app.use(indexRouter);
-    this.app.use(handRouter);
-  }
+// yaml 파일 연동
+const swaggerYaml = YAML.load(path.join(__dirname, "../../root/build/swagger.yaml"));
 
-  setMiddleware() {
-    this.app.use(morgan("dev"));
+app.use(morgan("dev"));
+app.use(cors());
 
-    this.app.use(express.urlencoded({ extended: true }));
-    this.app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
 
-    this.setRouter();
+app.use(routes);
 
-    this.app.use(errorMiddleware);
-  }
+// yaml로 된 swagger 연동
+app.use("/swagger", swaggerUi.serve, swaggerUi.setup(swaggerYaml));
 
-  init(PORT) {
-    this.app.listen(PORT, () => {
-      console.log(`${PORT}번 포트 온`);
-    });
+app.use(errorMiddleware);
 
-    this.setMiddleware();
-  }
-}
+export { app };
