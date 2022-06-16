@@ -1,7 +1,5 @@
 import { Router, Request, Response, NextFunction } from "express";
-
-import { body } from "express-validator";
-import { validate } from "../middlewares/validate";
+import { userValidateOptional } from "../middlewares/validators";
 
 import UserService from "../../services/userService";
 
@@ -15,23 +13,19 @@ export default (app: Router) => {
 
   app.use("/user", userRouter);
 
-  userRouter.post(
-    "/",
-    [body("email").isEmail().withMessage("이메일 입력해!").normalizeEmail(), validate],
-    async (req: Request, res: Response, next: NextFunction) => {
-      try {
-        const { email, password } = req.body;
-        const loginedUser = await userService.login(email, password);
+  userRouter.post("/", userValidateOptional, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { email, password } = req.body;
+      const loginedUser = await userService.login(email, password);
 
-        res.status(200).json(loginedUser);
-      } catch (error) {
-        res.statusCode = 400;
-        next(error);
-      }
-    },
-  );
+      res.status(200).json(loginedUser);
+    } catch (error) {
+      res.statusCode = 400;
+      next(error);
+    }
+  });
 
-  userRouter.put("/", checkLogin, async (req: Request, res: Response, next: NextFunction) => {
+  userRouter.put("/", checkLogin, userValidateOptional, async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { username, email } = req.body;
       const userId = req.user;
@@ -43,7 +37,7 @@ export default (app: Router) => {
     }
   });
 
-  userRouter.patch("/", checkLogin, async (req: Request, res: Response, next: NextFunction) => {
+  userRouter.patch("/", checkLogin, userValidateOptional, async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { password } = req.body;
       const userId = req.user;

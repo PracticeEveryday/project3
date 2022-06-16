@@ -1,13 +1,15 @@
 import { Router, Request, Response, NextFunction } from "express";
+import { userValidate } from "../middlewares/validators";
+
 import UserService from "../../services/registerService";
 import { MongoUserModel } from "../../db";
 
 export default (app: Router) => {
-  const userRouter = Router();
-  app.use("/register", userRouter);
+  const registerRouter = Router();
+  app.use("/register", registerRouter);
 
   // 회원가입 라우터
-  userRouter.post("/", async (req: Request, res: Response, next: NextFunction) => {
+  registerRouter.post("/", userValidate, async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { username, email, password } = req.body;
       const userService = new UserService(new MongoUserModel());

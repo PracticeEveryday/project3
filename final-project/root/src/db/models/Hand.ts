@@ -16,13 +16,13 @@ class MongoHandModel implements IHandModel {
   }
 
   // 수화 데이터 알파벳별로 가져오기
-  public async findByAlph(alphabet: String) {
-    const newHand = await Hand.find({ alphabet });
+  public async findByAlphabet(alphabet: string) {
+    const newHand = await Hand.find({ alphabet }).lean();
     return newHand;
   }
 
-  public async update({ id, toUpdate }: { id: String; toUpdate: Partial<String> }) {
-    const newHand = await Hand.findOneAndUpdate(id, { $set: toUpdate });
+  public async update({ id, toUpdate }: { id: string; toUpdate: Partial<IHand> }) {
+    const newHand = await Hand.findByIdAndUpdate(id, { $set: toUpdate });
     return newHand;
   }
 
